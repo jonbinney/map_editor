@@ -5,4 +5,5 @@ edition = "2018"
 authors = ["Jon Binney <jon.binney@gmail.com>"]
 
 [dependencies]
-bevy = { version = "0.5.0", features = ["dynamic"] }
+bevy = { version = "0.5", features = ["dynamic"] }
+bevy_flycam = "*"

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_flycam::PlayerPlugin;
 
 fn setup_scene(
     mut commands: Commands,
@@ -29,7 +30,9 @@ impl Plugin for MapEditorPlugin {
 
 fn main() {
     App::build()
+        .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
+        .add_plugin(PlayerPlugin)
         .add_plugin(MapEditorPlugin)
         .run();
 }
