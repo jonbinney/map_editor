@@ -1,0 +1,8 @@
+[package]
+name = "map_editor"
+version = "0.1.0"
+edition = "2018"
+authors = ["Jon Binney <jon.binney@gmail.com>"]
+
+[dependencies]
+bevy = "0.5" # make sure this is the latest version
