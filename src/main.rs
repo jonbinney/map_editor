@@ -3,12 +3,21 @@ use bevy_flycam::PlayerPlugin;
 
 fn setup_scene(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let texture_handle = asset_server.load("willow_garage_map.png");
+
+    let material_handle = materials.add(StandardMaterial {
+        base_color_texture: Some(texture_handle.clone()),
+        unlit: true,
+        ..Default::default()
+    });
+
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Plane { size: 5.0 })),
-        material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
+        material: material_handle,
         ..Default::default()
     });
     commands.spawn_bundle(LightBundle {
