@@ -20,7 +20,7 @@ fn setup_scene(
         material: material_handle,
         ..Default::default()
     });
-    commands.spawn_bundle(LightBundle {
+    commands.spawn_bundle(PointLightBundle {
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..Default::default()
     });
@@ -32,13 +32,13 @@ fn setup_scene(
 
 pub struct MapEditorPlugin;
 impl Plugin for MapEditorPlugin {
-    fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(setup_scene.system());
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(setup_scene);
     }
 }
 
 fn main() {
-    App::build()
+    App::new()
         .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(PlayerPlugin)

@@ -1,9 +1,9 @@
 [package]
 name = "map_editor"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 authors = ["Jon Binney <jon.binney@gmail.com>"]
 
 [dependencies]
-bevy = { version = "0.5", features = ["dynamic"] }
+bevy = { version = "0.7", features = ["dynamic"] }
 bevy_flycam = "*"
