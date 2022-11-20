@@ -1,5 +1,6 @@
+mod camera_control;
+
 use bevy::prelude::*;
-use bevy_flycam::PlayerPlugin;
 
 fn setup_scene(
     mut commands: Commands,
@@ -33,7 +34,8 @@ fn setup_scene(
 pub struct MapEditorPlugin;
 impl Plugin for MapEditorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_scene);
+        app.add_startup_system(setup_scene)
+            .add_plugin(camera_control::CameraControlPlugin);
     }
 }
 
@@ -41,7 +43,6 @@ fn main() {
     App::new()
         .insert_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
-        .add_plugin(PlayerPlugin)
         .add_plugin(MapEditorPlugin)
         .run();
 }
