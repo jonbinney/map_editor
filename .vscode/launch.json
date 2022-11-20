@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug",
+            "program": "${workspaceFolder}/target/debug/${workspaceRootFolderName}",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                // Needed for LD to find dyanmically-linked bevy when running in debug.
+                // See https://saveriomiroddi.github.io/Fixing-the-Visual-Studio-Code-cannot-open-shared-object-file-error-on-dynamically-linked-Bevy/
+                "LD_LIBRARY_PATH": "${workspaceFolder}/target/debug/deps:${env:HOME}/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib",
+              }
+        }
+    ],
+
+}
