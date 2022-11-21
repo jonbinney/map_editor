@@ -1,8 +1,9 @@
 use bevy::input::mouse::{MouseButton, MouseButtonInput, MouseMotion};
-use bevy::input::ElementState;
+use bevy::input::ButtonState;
 use bevy::prelude::*;
 use bevy::render::camera::Camera;
 
+#[derive(Resource)]
 pub struct CameraControlState {
     pub rotating: bool,
     pub yaw: f32,
@@ -29,13 +30,13 @@ pub fn toggle_rotating(
             MouseButton::Right => {
                 let window = windows.get_primary_mut().unwrap();
                 match event.state {
-                    ElementState::Pressed => {
+                    ButtonState::Pressed => {
                         camera_control_state.rotating = true;
-                        window.set_cursor_lock_mode(true);
+                        window.set_cursor_grab_mode(bevy::window::CursorGrabMode::Confined);
                     }
-                    ElementState::Released => {
+                    ButtonState::Released => {
                         camera_control_state.rotating = false;
-                        window.set_cursor_lock_mode(false);
+                        window.set_cursor_grab_mode(bevy::window::CursorGrabMode::None);
                     }
                 }
             }
