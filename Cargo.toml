@@ -6,4 +6,4 @@ authors = ["Jon Binney <jon.binney@gmail.com>"]
 
 [dependencies]
 bevy = { version = "0.9" }
-
+bevy_rapier3d = { version = "0.19", features = [ "simd-stable", "debug-render" ] }
