@@ -7,6 +7,7 @@ pub struct CreateWorldPlugin;
 impl Plugin for CreateWorldPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<CreateWorldState>()
+            .add_startup_system(create_axes)
             .add_system(create_world);
     }
 }
@@ -88,6 +89,45 @@ pub fn create_world(
                 panic!("Map texture unexpectedly unloaded");
             }
         }
+    }
+}
+
+pub fn create_axes(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // Extents and colors for each arrow.
+    let r = 0.03;
+    let l = 1.0;
+    let arrows = vec![
+        ((-r, l, -r, r, -r, r), (1.0, 0.0, 0.0)),
+        ((-r, r, -r, l, -r, r), (0.0, 1.0, 0.0)),
+        ((-r, r, -r, r, -r, l), (0.0, 0.0, 1.0)),
+    ];
+
+    for ((min_x, max_x, min_y, max_y, min_z, max_z), (r, g, b)) in arrows.iter() {
+        commands.spawn(PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Box {
+                min_x: *min_x,
+                max_x: *max_x,
+                min_y: *min_y,
+                max_y: *max_y,
+                min_z: *min_z,
+                max_z: *max_z,
+            })),
+            material: materials.add(StandardMaterial {
+                base_color: Color::Rgba {
+                    red: *r,
+                    green: *g,
+                    blue: *b,
+                    alpha: 0.8,
+                },
+                alpha_mode: AlphaMode::Blend,
+                ..default()
+            }),
+            ..default()
+        });
     }
 }
 
