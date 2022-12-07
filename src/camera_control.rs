@@ -2,7 +2,7 @@ use bevy::input::mouse::{MouseButton, MouseButtonInput, MouseMotion};
 use bevy::input::ButtonState;
 use bevy::prelude::*;
 use bevy::render::camera::Camera;
-
+use std::f32::consts::FRAC_PI_2;
 pub struct CameraControlPlugin;
 impl Plugin for CameraControlPlugin {
     fn build(&self, app: &mut App) {
@@ -27,11 +27,11 @@ impl Default for CameraControlState {
             rotating: false,
             position: Vec3 {
                 x: -2.0,
-                y: 2.5,
-                z: 5.0,
+                y: 0.0,
+                z: 3.0,
             },
-            yaw: -0.42,
-            pitch: -0.575,
+            yaw: 0.0,
+            pitch: 1.1,
         }
     }
 }
@@ -42,8 +42,9 @@ pub fn update_camera_pose(
 ) {
     for (_, mut transform) in camera_query.iter_mut() {
         transform.translation = camera_control_state.position;
-        transform.rotation = Quat::from_axis_angle(Vec3::Y, camera_control_state.yaw)
-            * Quat::from_axis_angle(Vec3::X, camera_control_state.pitch);
+        transform.rotation = Quat::from_rotation_z(camera_control_state.yaw)
+            * Quat::from_rotation_y(camera_control_state.pitch)
+            * Quat::from_mat3(&Mat3::from_cols(-Vec3::Y, Vec3::Z, -Vec3::X));
     }
 }
 
@@ -85,8 +86,6 @@ pub fn rotate_camera(
             camera_control_state.pitch -= 0.01 * motion_event.delta.y;
         }
 
-        camera_control_state.pitch = camera_control_state
-            .pitch
-            .clamp(-std::f32::consts::FRAC_PI_2, std::f32::consts::FRAC_PI_2);
+        camera_control_state.pitch = camera_control_state.pitch.clamp(-FRAC_PI_2, FRAC_PI_2);
     }
 }

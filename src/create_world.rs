@@ -52,6 +52,10 @@ pub fn create_world(
         commands.spawn(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Plane { size: 5.0 })),
             material: material_handle,
+            transform: Transform::from_rotation(Quat::from_axis_angle(
+                Vec3::X,
+                std::f32::consts::FRAC_PI_2,
+            )),
             ..Default::default()
         });
         commands.spawn(PointLightBundle {
@@ -100,13 +104,13 @@ pub fn create_axes(
     // Extents and colors for each arrow.
     let r = 0.03;
     let l = 1.0;
-    let arrows = vec![
-        ((-r, l, -r, r, -r, r), (1.0, 0.0, 0.0)),
-        ((-r, r, -r, l, -r, r), (0.0, 1.0, 0.0)),
-        ((-r, r, -r, r, -r, l), (0.0, 0.0, 1.0)),
+    let arrows: &[([f32; 6], [f32; 3])] = &[
+        ([-r, l, -r, r, -r, r], [1.0, 0.0, 0.0]),
+        ([-r, r, -r, l, -r, r], [0.0, 1.0, 0.0]),
+        ([-r, r, -r, r, -r, l], [0.0, 0.0, 1.0]),
     ];
 
-    for ((min_x, max_x, min_y, max_y, min_z, max_z), (r, g, b)) in arrows.iter() {
+    for ([min_x, max_x, min_y, max_y, min_z, max_z], [r, g, b]) in arrows.iter() {
         commands.spawn(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box {
                 min_x: *min_x,
