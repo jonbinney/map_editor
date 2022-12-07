@@ -10,6 +10,16 @@ fn create_camera(mut commands: Commands) {
 
 fn main() {
     App::new()
+        // We set the physics gravity to be in the -Z direction because we use the
+        // robotics coordinate convention.
+        .insert_resource(RapierConfiguration {
+            gravity: Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: -9.81,
+            },
+            ..default()
+        })
         .add_plugins(DefaultPlugins)
         // Must be a less hacky way to do this. We need the camera to exist
         // before the camera control starts up, so it can find it and set the

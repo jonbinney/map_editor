@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy::render::texture::ImageSampler;
-//use bevy_rapier3d::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 pub struct CreateWorldPlugin;
 impl Plugin for CreateWorldPlugin {
@@ -49,6 +49,7 @@ pub fn create_world(
             ..Default::default()
         });
 
+        // Graphics for the ground.
         commands.spawn(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Plane { size: 5.0 })),
             material: material_handle,
@@ -58,10 +59,24 @@ pub fn create_world(
             )),
             ..Default::default()
         });
+        // Collider for the ground.
+        commands.spawn((
+            TransformBundle::from(Transform::from_xyz(0.0, 0.0, -0.1)),
+            Collider::cuboid(2.5, 2.5, 0.1),
+        ));
+
         commands.spawn(PointLightBundle {
             transform: Transform::from_xyz(4.0, 8.0, 4.0),
             ..Default::default()
         });
+
+        // Collider for falling object.
+        commands.spawn((
+            TransformBundle::from(Transform::from_xyz(0.0, 0.0, 1.0)),
+            RigidBody::Dynamic,
+            Collider::cuboid(0.1, 0.1, 0.1),
+            ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
+        ));
         create_world_state.world_created = true;
     } else {
         match asset_server.get_load_state(create_world_state.map_texture_handle.id()) {
