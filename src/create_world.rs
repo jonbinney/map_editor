@@ -52,7 +52,7 @@ pub fn create_world(
         // Graphics for the ground.
         commands.spawn(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Plane { size: 5.0 })),
-            material: material_handle,
+            material: material_handle.clone(),
             transform: Transform::from_rotation(Quat::from_axis_angle(
                 Vec3::X,
                 std::f32::consts::FRAC_PI_2,
@@ -70,9 +70,25 @@ pub fn create_world(
             ..Default::default()
         });
 
+        let wheel_mesh = Mesh::from(shape::Torus {
+            radius: 0.3,
+            ring_radius: 0.05,
+            subdivisions_segments: 12,
+            subdivisions_sides: 8,
+        });
+        let wheel_material_handle = materials.add(StandardMaterial {
+            base_color: Color::AZURE,
+            ..Default::default()
+        });
+
         // Collider for falling object.
         commands.spawn((
-            TransformBundle::from(Transform::from_xyz(0.0, 0.0, 1.0)),
+            PbrBundle {
+                mesh: meshes.add(wheel_mesh),
+                material: wheel_material_handle,
+                transform: Transform::from_xyz(0.0, 0.0, 1.0),
+                ..Default::default()
+            },
             RigidBody::Dynamic,
             Collider::cuboid(0.1, 0.1, 0.1),
             ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
