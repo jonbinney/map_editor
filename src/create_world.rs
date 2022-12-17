@@ -70,29 +70,7 @@ pub fn create_world(
             ..Default::default()
         });
 
-        let wheel_mesh = Mesh::from(shape::Torus {
-            radius: 0.3,
-            ring_radius: 0.05,
-            subdivisions_segments: 12,
-            subdivisions_sides: 8,
-        });
-        let wheel_material_handle = materials.add(StandardMaterial {
-            base_color: Color::AZURE,
-            ..Default::default()
-        });
-
-        // Collider for falling object.
-        commands.spawn((
-            PbrBundle {
-                mesh: meshes.add(wheel_mesh),
-                material: wheel_material_handle,
-                transform: Transform::from_xyz(0.0, 0.0, 1.0),
-                ..Default::default()
-            },
-            RigidBody::Dynamic,
-            Collider::cuboid(0.1, 0.1, 0.1),
-            ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
-        ));
+        
         create_world_state.world_created = true;
     } else {
         match asset_server.get_load_state(create_world_state.map_texture_handle.id()) {
