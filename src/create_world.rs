@@ -27,7 +27,7 @@ impl Default for CreateWorldState {
             assets_loaded: false,
             world_created: false,
             map_texture_i: 0,
-            map_texture_uris: vec!["willow_garage_map.png".to_string()],
+            map_texture_uris: vec![],
             map_texture_handle: Default::default(),
         }
     }
@@ -50,8 +50,9 @@ pub fn create_world(
         });
 
         // Graphics for the ground.
+        let ground_size = 20.0;
         commands.spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Plane { size: 5.0 })),
+            mesh: meshes.add(Mesh::from(shape::Plane { size: ground_size })),
             material: material_handle.clone(),
             transform: Transform::from_rotation(Quat::from_axis_angle(
                 Vec3::X,
@@ -62,7 +63,7 @@ pub fn create_world(
         // Collider for the ground.
         commands.spawn((
             TransformBundle::from(Transform::from_xyz(0.0, 0.0, -0.1)),
-            Collider::cuboid(2.5, 2.5, 0.1),
+            Collider::cuboid(ground_size / 2.0, ground_size / 2.0, 0.1),
         ));
 
         commands.spawn(PointLightBundle {
@@ -70,7 +71,6 @@ pub fn create_world(
             ..Default::default()
         });
 
-        
         create_world_state.world_created = true;
     } else {
         match asset_server.get_load_state(create_world_state.map_texture_handle.id()) {

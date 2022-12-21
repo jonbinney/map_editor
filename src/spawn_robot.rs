@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::model;
+
 pub struct SpawnRobotPlugin;
 impl Plugin for SpawnRobotPlugin {
     fn build(&self, app: &mut App) {
@@ -13,6 +15,11 @@ pub fn spawn_robot(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let robot_length = 0.5;
+    let robot_width = 0.5;
+    let wheel_radius = 0.2;
+    let wheel_width = 0.05;
+    let caster_radius = 0.1;
     let base_link_transform = Transform::from_xyz(0.0, 0.0, 0.3);
 
     let base_mesh = Mesh::from(shape::Cube { size: 0.2 });
@@ -22,8 +29,10 @@ pub fn spawn_robot(
     });
     let base_entity_id = commands
         .spawn((
-            RigidBody::Dynamic,
+            model::LinkName("base_link".into()),
+            RigidBody::Fixed,
             Collider::from_bevy_mesh(&base_mesh, &ComputedColliderShape::TriMesh).unwrap(),
+            ColliderMassProperties::Mass(10.0),
             ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
             PbrBundle {
                 mesh: meshes.add(base_mesh),
@@ -34,24 +43,46 @@ pub fn spawn_robot(
         ))
         .id();
 
-    // Origins of wheels in base_link frame.
-    let l = 0.5;
-    let w = 0.5;
-    let wheels: &[Vec3] = &[
-        Vec3::new(l / 2.0, w / 2.0, 0.0), 
-        Vec3::new(-l / 2.0, w / 2.0, 0.0),
-        Vec3::new(l / 2.0, -w / 2.0, 0.0),
-        Vec3::new(-l / 2.0, -w / 2.0, 0.0),
+    let caster_mesh = Mesh::from(shape::Cube {
+        size: caster_radius,
+    });
+    let caster_material_handle = materials.add(StandardMaterial {
+        base_color: Color::BLUE,
+        ..Default::default()
+    });
+    let caster_origin = Vec3::new(-robot_length, 0.0, -wheel_radius + caster_radius);
+    let caster_joint = FixedJointBuilder::new().local_anchor1(caster_origin);
+
+    commands.spawn((
+        model::LinkName("caster_link".into()),
+        RigidBody::Dynamic,
+        Collider::ball(caster_radius),
+        ColliderMassProperties::Mass(10.0),
+        ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
+        MultibodyJoint::new(base_entity_id, caster_joint),
+        PbrBundle {
+            mesh: meshes.add(caster_mesh),
+            material: caster_material_handle,
+            transform: base_link_transform
+                * Transform::from_xyz(caster_origin.x, caster_origin.y, caster_origin.z),
+            ..Default::default()
+        },
+    ));
+
+    // Origins and names of wheels in base_link frame.
+    let wheels: &[(Vec3, &str)] = &[
+        (Vec3::new(0.0, robot_width / 2.0, 0.0), "left_wheel"),
+        (Vec3::new(0.0, -robot_width / 2.0, 0.0), "right_wheel"),
     ];
-    for wheel_origin in wheels {
+    for (wheel_origin, link_name) in wheels {
         let wheel_transform = Transform {
             translation: *wheel_origin,
             rotation: Quat::IDENTITY,
             ..default()
         };
         let wheel_mesh = Mesh::from(shape::Torus {
-            radius: 0.13,
-            ring_radius: 0.1,
+            radius: wheel_radius - wheel_width,
+            ring_radius: wheel_width,
             subdivisions_segments: 12,
             subdivisions_sides: 8,
         });
@@ -62,10 +93,16 @@ pub fn spawn_robot(
         let joint = RevoluteJointBuilder::new(Vec3::Y).local_anchor1(*wheel_origin);
 
         commands.spawn((
+            model::LinkName(String::from(*link_name)),
             RigidBody::Dynamic,
-            Collider::from_bevy_mesh(&wheel_mesh, &ComputedColliderShape::TriMesh).unwrap(),
+            Collider::cylinder(wheel_width, wheel_radius),
+            ColliderMassProperties::Mass(1.0),
             ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
-            ImpulseJoint::new(base_entity_id, joint),
+            Friction {
+                coefficient: 0.3,
+                combine_rule: CoefficientCombineRule::Min,
+            },
+            MultibodyJoint::new(base_entity_id, joint),
             PbrBundle {
                 mesh: meshes.add(wheel_mesh),
                 material: wheel_material_handle,
