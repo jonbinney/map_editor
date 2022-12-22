@@ -29,7 +29,7 @@ fn simulation_control_window(
     mut egui_context: ResMut<EguiContext>,
     mut rapier_config: ResMut<RapierConfiguration>,
 ) {
-    egui::Window::new("Simulation Control").show(egui_context.ctx_mut(), |ui| {
+    egui::Window::new("Simulation").show(egui_context.ctx_mut(), |ui| {
         if rapier_config.physics_pipeline_active {
             if ui.button("Pause").clicked() {
                 println!("Pausing physics");

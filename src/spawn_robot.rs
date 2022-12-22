@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+use rapier3d::dynamics::MotorModel;
 
 use crate::model;
 
@@ -30,7 +31,7 @@ pub fn spawn_robot(
     let base_entity_id = commands
         .spawn((
             model::LinkName("base_link".into()),
-            RigidBody::Fixed,
+            RigidBody::Dynamic,
             Collider::from_bevy_mesh(&base_mesh, &ComputedColliderShape::TriMesh).unwrap(),
             ColliderMassProperties::Mass(10.0),
             ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
@@ -59,7 +60,11 @@ pub fn spawn_robot(
         Collider::ball(caster_radius),
         ColliderMassProperties::Mass(10.0),
         ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
-        MultibodyJoint::new(base_entity_id, caster_joint),
+        Friction {
+            coefficient: 0.0,
+            combine_rule: CoefficientCombineRule::Min,
+        },
+        ImpulseJoint::new(base_entity_id, caster_joint),
         PbrBundle {
             mesh: meshes.add(caster_mesh),
             material: caster_material_handle,
@@ -90,7 +95,10 @@ pub fn spawn_robot(
             base_color: Color::AZURE,
             ..Default::default()
         });
-        let joint = RevoluteJointBuilder::new(Vec3::Y).local_anchor1(*wheel_origin);
+        let joint = RevoluteJointBuilder::new(Vec3::Y)
+            .local_anchor1(*wheel_origin)
+            .motor_model(MotorModel::ForceBased)
+            .motor_max_force(40.0);
 
         commands.spawn((
             model::LinkName(String::from(*link_name)),
@@ -99,10 +107,13 @@ pub fn spawn_robot(
             ColliderMassProperties::Mass(1.0),
             ColliderDebugColor(Color::hsl(220.0, 1.0, 0.3)),
             Friction {
-                coefficient: 0.3,
-                combine_rule: CoefficientCombineRule::Min,
+                coefficient: 0.8,
+                combine_rule: CoefficientCombineRule::Max,
             },
-            MultibodyJoint::new(base_entity_id, joint),
+            ImpulseJoint::new(base_entity_id, joint),
+            // If we don't disable sleeping, the joint motor seems to fail
+            // sometimes.
+            Sleeping::disabled(),
             PbrBundle {
                 mesh: meshes.add(wheel_mesh),
                 material: wheel_material_handle,
